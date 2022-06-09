@@ -76,17 +76,20 @@ class Platforms(enum.Enum):
 
 class Experiment(Base):
     __tablename__ = EXPERIMENTS_TABLE
+    __table_args__ = (
+        UniqueConstraint('name', 'wallclock_start', name='unique_experiment'),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(128), nullable=False)
-    start = Column(DateTime, nullable=False)
-    end = Column(DateTime, nullable=False)
+    cycle_start = Column(DateTime, nullable=False)
+    cycle_stop = Column(DateTime, nullable=False)
     owner_id = Column(String(64), nullable=False)
     group_id = Column(String(16))
-    experiment_type = (String(64))
+    experiment_type = Column(String(64))
     # platform = Column(sa.Enum('Hera','Orion', 'azpw_v1','azpw_v2', 'awpw_v1', name='platform_name'))
     platform = Column(String(16), nullable=False)
-    wallclock_start = Column(DateTime)
+    wallclock_start = Column(DateTime, nullable=False)
     wallclock_end = Column(DateTime)
     description = Column(JSONB(astext_type=sa.Text()), nullable=True)
     created_at = Column(DateTime)
