@@ -14,7 +14,7 @@ import json
 import pprint
 from db_action_response import DbActionResponse
 import score_table_models as stm
-from score_table_models import Experiment as exp
+from score_table_models import MetricType as mt
 
 from pandas import DataFrame
 import sqlalchemy as db
@@ -24,15 +24,6 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy import asc, desc
 from sqlalchemy.sql import func
 
-
-HERA = 'hera'
-ORION = 'orion'
-PW_AZV1 = 'pw_azv1'
-PW_AZV2 = 'pw_azv2'
-PW_AWV1 = 'pw_awv1'
-PW_AWV2 = 'pw_awv2'
-
-VALID_PLATFORMS = [HERA, ORION, PW_AZV1, PW_AZV2, PW_AWV1, PW_AWV2]
 
 INSERT = 'INSERT'
 UPDATE = 'UPDATE'
@@ -54,25 +45,23 @@ VALID_METHODS = [HTTP_GET, HTTP_PUT]
 
 DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d_%H:%M:%S'
 
-ExperimentData = namedtuple(
-    'ExperimentData',
+
+MetricTypeData = namedtuple(
+    'MetricTypeData',
     [
         'name',
-        'cycle_start',
-        'cycle_stop',
-        'owner_id',
-        'group_id',
-        'experiment_type',
-        'platform',
-        'wallclock_start',
-        'wallclock_end',
+        'measurement_type',
+        'measurement_units',
+        'stat_type',
         'description'
     ],
 )
 
+
 def validate_method(method):
     if method not in VALID_METHODS:
-        msg = f'Request type must be one of: {VALID_METHODS}, actually: {method}'
+        msg = f'Request type must be one of: {VALID_METHODS}, actually: ' \
+            f'{method}'
         print(msg)
         raise ValueError(msg)
     
@@ -80,56 +69,36 @@ def validate_method(method):
 
 
 @dataclass
-class Experiment:
-    ''' region object storing region name and min/max latitude bounds '''
+class MetricType:
+    ''' metric type object storing data related to the measurement type '''
     name: str
-    cycle_start: datetime
-    cycle_stop: datetime
-    owner_id: str
-    group_id: str
-    experiment_type: str
-    platform: str
-    wallclock_start: datetime
-    wallclock_end: datetime
+    measurement_type: str
+    measurement_units: str
+    stat_type: str
     description: dict
-    experiment_data: ExperimentData = field(init=False)
+    metric_type_data: MetricTypeData = field(init=False)
 
     def __post_init__(self):
         print(f'in post init name: {self.name}')
-        if self.cycle_start > self.cycle_stop:
-            msg = f'start time must be before end time - start: {self.cycle_start}, ' \
-                f'end: {self.cycle_stop}'
-            raise ValueError(msg)
-        if self.platform not in VALID_PLATFORMS:
-            msg = f'\'platform\' must be one of {VALID_PLATFORMS}, was ' \
-                f'\'{self.platform}\''
-            raise ValueError(msg)
-        
         print(f'description: {self.description}')
-        self.experiment_data = ExperimentData(
+        self.metric_type_data = MetricTypeData(
             self.name,
-            self.cycle_start,
-            self.cycle_stop,
-            self.owner_id,
-            self.group_id,
-            self.experiment_type,
-            self.platform,
-            self.wallclock_start,
-            self.wallclock_end,
+            self.measurement_type,
+            self.measurement_units,
+            self.stat_type,
             self.description
         )
 
 
     def __repr__(self):
-        return f'experiment_data: {self.experiment_data}'
+        return f'metric_type_data: {self.metric_type_data}'
 
 
-    def get_experiment_data(self):
-        return self.experiment_data
+    def get_metric_type_data(self):
+        return self.metric_type_data
 
 
-
-def get_experiment_from_body(body):
+def get_metric_type_from_body(body):
     if not isinstance(body, dict):
         msg = 'The \'body\' key must be a type dict, actually ' \
             f'{type(body)}'
@@ -141,43 +110,16 @@ def get_experiment_from_body(body):
         msg = 'Error loading \'description\', must be valid JSON - err: {err}'
         raise ValueError(msg) from err
 
-    datestr_format = body.get('datestr_format')
-    CYCLE_START = 'cycle_start'
-    CYCLE_STOP = 'cycle_stop'
-    WALLCLOCK_START = 'wallclock_start'
-    WALLCLOCK_END = 'wallclock_end'
-
-    datetime_strs = [CYCLE_START, CYCLE_STOP, WALLCLOCK_START, WALLCLOCK_END]
-    exp_dates = {}
-
-    for date_var_str in datetime_strs:
-        try:
-            dstr = body.get(date_var_str)
-            if dstr is None or dstr == 'None':
-                exp_dates[date_var_str] = datetime(1970, 1, 1)
-            else:
-                exp_dates[date_var_str] = datetime.strptime(dstr, datestr_format)
-
-        except Exception as err:
-            msg = f'Problem parsing experiment \'{date_var_str}\': ' \
-                f'{exp_dates[date_var_str]}, datestr_format: ' \
-                f'{datestr_format}, err: {err}'
-            raise ValueError(msg) from err
-
-    experiment = Experiment(
+    metric_type = MetricType(
         body.get('name'),
-        exp_dates[CYCLE_START],
-        exp_dates[CYCLE_STOP],
-        body.get('owner_id'),
-        body.get('group_id'),
-        body.get('experiment_type'),
-        body.get('platform'),
-        exp_dates[WALLCLOCK_START],
-        exp_dates[WALLCLOCK_END],
+        body.get('measurement_type'),
+        body.get('measurement_units'),
+        body.get('stat_type'),
         description
     )
     
-    return experiment
+    return metric_type
+
 
 def get_formatted_time(value, format_str):
     try:
@@ -186,6 +128,7 @@ def get_formatted_time(value, format_str):
         msg = f'Problem formatting time: {value} with format_str' \
             f' \'{format_str}\'. error: {err}.'
         raise ValueError(msg) from err
+
 
 def get_time(value, datetime_format=None):
     if value is None:
@@ -208,52 +151,6 @@ def get_time(value, datetime_format=None):
         raise ValueError(msg) from err
     
     return parsed_time
-
-
-def get_time_filter(filters, cls, key, constructed_filter):
-    if not isinstance(filters, dict):
-        msg = f'Invalid type for filters, must be \'dict\', actually ' \
-            f'type: {type(filters)}'
-        raise TypeError(msg)
-
-    bounds = filters.get(key)
-    if bounds is None:
-        print(f'No \'{key}\' filter detected')
-        return constructed_filter
-
-    exact_datetime = get_time(bounds.get(EXACT_DATETIME))
-    print(f'exact_datetime: {exact_datetime}')
-    if exact_datetime is not None:
-        constructed_filter[key] = (
-            getattr(cls, key) == exact_datetime
-        )
-        return constructed_filter
-
-    from_datetime = get_time(bounds.get(FROM_DATETIME))
-    to_datetime = get_time(bounds.get(TO_DATETIME))
-    
-    
-    print(f'Column \'{key}\' is of type {type(getattr(cls, key).type)}.')
-
-    if from_datetime is not None and to_datetime is not None:
-        if to_datetime < from_datetime:
-            raise ValueError('\'from\' must be older than \'to\'')
-        
-        constructed_filter[key] = and_(
-            getattr(cls, key) >= from_datetime,
-            getattr(cls, key) <= to_datetime
-        )
-    elif from_datetime is not None:
-        constructed_filter[key] = (
-            getattr(cls, key) >= from_datetime
-        )
-    elif to_datetime is not None:
-        constructed_filter[key] = (
-            getattr(cls, key) <= to_datetime
-        )
-
-    print(f'constructed_filter: {constructed_filter}')
-    return constructed_filter
 
 
 def get_string_filter(filters, cls, key, constructed_filter):
@@ -286,25 +183,16 @@ def construct_filters(filters):
     constructed_filter = {}
 
     constructed_filter = get_string_filter(
-        filters, exp, 'name', constructed_filter)
-
-    constructed_filter = get_time_filter(
-        filters, exp, 'cycle_start', constructed_filter)
-
-    constructed_filter = get_time_filter(
-        filters, exp, 'cycle_stop', constructed_filter)
-
-    constructed_filter = get_time_filter(
-        filters, exp, 'wallclock_start', constructed_filter)
-
-    constructed_filter = get_time_filter(
-        filters, exp, 'wallclock_end', constructed_filter)
+        filters, mt, 'name', constructed_filter)
 
     constructed_filter = get_string_filter(
-        filters, exp, 'owner_id', constructed_filter)
+        filters, mt, 'measurement_type', constructed_filter)
 
     constructed_filter = get_string_filter(
-        filters, exp, 'group_id', constructed_filter)
+        filters, mt, 'measurement_units', constructed_filter)
+
+    constructed_filter = get_string_filter(
+        filters, mt, 'stat_type', constructed_filter)
     
     return constructed_filter
 
@@ -353,10 +241,7 @@ def build_column_ordering(cls, ordering):
 
         col_obj = validate_column_name(cls, value.get('name'))
         order_by = validate_order_dir(value.get('order_by'))
-        # if col_name is None or order_by is None:
-        #     msg = 'ordering item missing either \'name\' or \'order_by\' - ' \
-        #         f'ordering item: {value}.'
-        #     raise KeyValue(msg)
+
         if order_by == ASCENDING:
             constructed_ordering.append(asc(col_obj))
         else:
@@ -366,8 +251,18 @@ def build_column_ordering(cls, ordering):
     return constructed_ordering
 
 
+def get_all_metric_types():
+    request_dict = {
+        'name': 'metric_type',
+        'method': 'GET'
+    }
+
+    mtr = MetricTypeRequest(request_dict)
+    return mtr.submit()
+
+
 @dataclass
-class ExperimentRequest:
+class MetricTypeRequest:
     request_dict: dict
     method: str = field(default_factory=str, init=False)
     params: dict = field(default_factory=dict, init=False)
@@ -375,98 +270,93 @@ class ExperimentRequest:
     ordering: list = field(default_factory=list, init=False)
     record_limit: int = field(default_factory=int, init=False)
     body: dict = field(default_factory=dict, init=False)
-    experiment: Experiment = field(init=False)
-    experiment_data: namedtuple = field(init=False)
+    metric_type: MetricType = field(init=False)
+    metric_type_data: namedtuple = field(init=False)
     response: dict = field(default_factory=dict, init=False)
+
 
     def __post_init__(self):
         method = self.request_dict.get('method')
         self.method = validate_method(self.request_dict.get('method'))
         self.params = self.request_dict.get('params')
-        self.filters = None
-        self.ordering = None
-        self.record_limit = None
 
-        if isinstance(self.params, dict):
-            self.filters = construct_filters(self.params.get('filters'))
-            self.ordering = self.params.get('ordering')
-            self.record_limit = self.params.get('record_limit')
-            if not type(self.record_limit) == int or self.record_limit <= 0:
-                self.record_limit = None
-                
-        print(f'filters: {self.filters}')
         self.body = self.request_dict.get('body')
         if self.method == HTTP_PUT:
-            self.experiment = get_experiment_from_body(self.body)
-            # pprint(f'experiment: {repr(self.experiment)}')
-            self.experiment_data = self.experiment.get_experiment_data()
-            for k, v in zip(self.experiment_data._fields, self.experiment_data):
+            self.metric_type = get_metric_type_from_body(self.body)
+            # pprint(f'metric_type : {repr(self.metric_type)}')
+            self.metric_type_data = self.metric_type.get_metric_type_data()
+            for k, v in zip(
+                self.metric_type_data._fields, self.metric_type_data
+            ):
                 val = pprint.pformat(v, indent=4)
                 print(f'exp_data: k: {k}, v: {val}')
-        
+        else:
+            print(f'In MetricTypeRequest - params: {self.params}')
+            if isinstance(self.params, dict):
+                self.filters = construct_filters(self.params.get('filters'))
+                self.ordering = self.params.get('ordering')
+                self.record_limit = self.params.get('record_limit')
+            
+                if not type(self.record_limit) == int or self.record_limit <= 0:
+                    self.record_limit = None
+            else:
+                self.filters = None
+                self.ordering = None
+                self.record_limit = None
+
+
+    def failed_request(self, error_msg):
+        return DbActionResponse(
+            request=self.request_dict,
+            success=False,
+            message='Failed metric type request.',
+            details=None,
+            errors=error_msg
+        )
+
 
     def submit(self):
 
         if self.method == HTTP_GET:
-            return self.get_experiments()
+            return self.get_metric_types()
         elif self.method == HTTP_PUT:
             # becomes an update if record exists
-            return self.put_experiment()
+            try:
+                return self.put_metric_type()
+            except Exception as err:
+                error_msg = 'Failed to insert metric type record -' \
+                    f' err: {err}'
+                print(f'Submit PUT error: {error_msg}')
+                return self.failed_request(error_msg)
 
     
-    def put_experiment(self):
+    def put_metric_type(self):
         engine = stm.get_engine_from_settings()
         session = stm.get_session()
 
-        record = exp(
-            name=self.experiment_data.name,
-            cycle_start=self.experiment_data.cycle_start,
-            cycle_stop=self.experiment_data.cycle_stop,
-            owner_id=self.experiment_data.owner_id,
-            group_id=self.experiment_data.group_id,
-            experiment_type=self.experiment_data.experiment_type,
-            platform=self.experiment_data.platform,
-            wallclock_start=self.experiment_data.wallclock_start,
-            wallclock_end=self.experiment_data.wallclock_end,
-            description=self.experiment_data.description,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
-
-        insert_stmt = insert(exp).values(
-            name=self.experiment_data.name,
-            cycle_start=self.experiment_data.cycle_start,
-            cycle_stop=self.experiment_data.cycle_stop,
-            owner_id=self.experiment_data.owner_id,
-            group_id=self.experiment_data.group_id,
-            experiment_type=self.experiment_data.experiment_type,
-            platform=self.experiment_data.platform,
-            wallclock_start=self.experiment_data.wallclock_start,
-            wallclock_end=self.experiment_data.wallclock_end,
-            description=self.experiment_data.description,
+        insert_stmt = insert(mt).values(
+            name=self.metric_type_data.name,
+            measurement_type=self.metric_type_data.measurement_type,
+            measurement_units=self.metric_type_data.measurement_units,
+            stat_type=self.metric_type_data.stat_type,
+            description=self.metric_type_data.description,
             created_at=datetime.utcnow(),
             updated_at=None
-        ).returning(exp)
+        ).returning(mt)
         print(f'insert_stmt: {insert_stmt}')
 
         time_now = datetime.utcnow()
 
         do_update_stmt = insert_stmt.on_conflict_do_update(
-            constraint='unique_experiment',
+            constraint='unique_metric_type',
             set_=dict(
                 # group_id=self.experiment_data.group_id,
-                wallclock_end=time_now,
+                description=self.metric_type_data.description,
                 updated_at=time_now
             )
         )
 
         print(f'do_update_stmt: {do_update_stmt}')
-
-        
-        # temp = vars(result._metadata)
-        # print(f'result.inserted_primary_key: {result.inserted_primary_key}')
-        # for item in temp:
-        #     print(item, ':', temp[item])
 
         try:
             result = session.execute(do_update_stmt)
@@ -483,7 +373,7 @@ class ExperimentRequest:
             session.close()
         except Exception as err:
             action = INSERT
-            message = f'Attempt to {action} experiment record FAILED'
+            message = f'Attempt to {action} metric type record FAILED'
             error_msg = f'Failed to insert/update record - err: {err}'
             print(f'error_msg: {error_msg}')
         else:
@@ -508,55 +398,54 @@ class ExperimentRequest:
         return response
 
     
-    def get_experiments(self):
+    def get_metric_types(self):
         engine = stm.get_engine_from_settings()
         session = stm.get_session()
 
         q = session.query(
-            exp.id,
-            exp.name,
-            exp.cycle_start,
-            exp.cycle_stop,
-            exp.owner_id,
-            exp.group_id,
-            exp.experiment_type,
-            exp.platform,
-            exp.wallclock_start,
-            exp.wallclock_end,
-            exp.created_at,
-            exp.updated_at
+            mt.id,
+            mt.name,
+            mt.measurement_type,
+            mt.measurement_units,
+            mt.stat_type,
+            mt.description,
+            mt.created_at,
+            mt.updated_at
         ).select_from(
-            exp
+            mt
         )
 
+        print('Before adding filters to metric types request########################')
         if self.filters is not None and len(self.filters) > 0:
             for key, value in self.filters.items():
                 q = q.filter(value)
         
+        print('After adding filters to metric types request########################')
+        
         # add column ordering
-        column_ordering = build_column_ordering(exp, self.ordering)
+        column_ordering = build_column_ordering(mt, self.ordering)
         if column_ordering is not None and len(column_ordering) > 0:
             for ordering_item in column_ordering:
                 q = q.order_by(ordering_item)
 
         # limit number of returned records
-        if self.record_limit is not None:
+        if self.record_limit is not None and self.record_limit > 0:
             q = q.limit(self.record_limit)
 
-        experiments = q.all()
+        metric_types = q.all()
 
         results = DataFrame()
         error_msg = None
         record_count = 0
         try:
-            if len(experiments) > 0:
-                results = DataFrame(experiments, columns = experiments[0]._fields)
+            if len(metric_types) > 0:
+                results = DataFrame(metric_types, columns = metric_types[0]._fields)
             
         except Exception as err:
-            message = 'Request for experiment records FAILED'
-            error_msg = f'Failed to get experiment records - err: {err}'
+            message = 'Request for metric type records FAILED'
+            error_msg = f'Failed to get metric type  records - err: {err}'
         else:
-            message = 'Request for experiment records SUCCEEDED'
+            message = 'Request for metric type records SUCCEEDED'
             for idx, row in results.iterrows():
                 print(f'idx: {idx}, row: {row}')
             record_count = len(results.index)

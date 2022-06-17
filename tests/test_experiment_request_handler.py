@@ -43,33 +43,33 @@ def test_validate_method():
     print(f'PYTEST_CALLING_DIR: {PYTEST_CALLING_DIR}')
     print(f'EXPERIMENT_CONFIG_FILE: {EXPERIMENT_CONFIG_FILE}')
 
-# def test_parse_request_dict():
+def test_parse_request_dict():
 
-#     with open(EXPERIMENT_CONFIG_FILE, 'r') as config_file:
-#         data=config_file.read()
+    with open(EXPERIMENT_CONFIG_FILE, 'r') as config_file:
+        data=config_file.read()
     
-#     description = json.loads(data)
+    description = json.loads(data)
 
-#     request_dict = {
-#         'name': 'experiment',
-#         'method': 'PUT',
-#         'body': {
-#             'name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AWS_C5N18XL_122015',
-#             'datestr_format': '%Y-%m-%d_%H:%M:%S',
-#             'cycle_start': '2015-12-01_00:00:00',
-#             'cycle_stop': '2016-02-01_00:00:00',
-#             'owner_id': 'Steve.Lawrence@noaa.gov',
-#             'group_id': 'bob',
-#             'experiment_type': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_012016',
-#             'platform': 'pw_awv1',
-#             'wallclock_start': '2022-02-01_16:22:04',
-#             'wallclock_end': 'None',
-#             'description': json.dumps(description)
-#         }
-#     }
+    request_dict = {
+        'name': 'experiment',
+        'method': 'PUT',
+        'body': {
+            'name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AZURE_HC44RS_122015',
+            'datestr_format': '%Y-%m-%d_%H:%M:%S',
+            'cycle_start': '2015-12-01_00:00:00',
+            'cycle_stop': '2016-02-01_00:00:00',
+            'owner_id': 'Steve.Lawrence@noaa.gov',
+            'group_id': 'gsienkf',
+            'experiment_type': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_012016',
+            'platform': 'pw_awv1',
+            'wallclock_start': '2022-08-03_02:40:34',
+            'wallclock_end': 'None',
+            'description': json.dumps(description)
+        }
+    }
 
-#     er = ExperimentRequest(request_dict)
-#     er.submit()
+    er = ExperimentRequest(request_dict)
+    er.submit()
 
 def test_send_get_request():
 
