@@ -13,7 +13,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, MetaData, ForeignKey
 from sqlalchemy import Integer, String, Boolean, DateTime, Float
-# from sqlalchemy.dialects.postgresql import ENUM
+
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import inspect, UniqueConstraint
@@ -38,18 +38,17 @@ def get_engine(user, passwd, host, port, db):
     if not database_exists(url):
         create_database(url)
 
-    return create_engine(
+    db_engine = create_engine(
         url,
         pool_size=50,
         echo=False,
         connect_args={"options": "-c timezone=utc"}
     )
 
+    return db_engine
+
 
 def get_engine_from_settings():
-    # keys = ['pguser', 'pgpasswd', 'pghost', 'pgport', 'pgdb']
-    # if not all(key in keys for key in env.psql_conf.keys()):
-    #     raise Exception('Bad config file')
 
     return get_engine(
         os.getenv('SCORE_POSTGRESQL_DB_USERNAME'),
@@ -69,8 +68,6 @@ class Platforms(enum.Enum):
     ORION = 2
     AZPW_V1 = 3
     AZPW_V2 = 4
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     name = Column(String(32), nullable=False)
 
 
 class Experiment(Base):
@@ -162,6 +159,9 @@ class MetricType(Base):
 Base.metadata.create_all(engine)
 
 def get_session():
+    engine = get_engine_from_settings()
+    Session = sessionmaker(bind=engine)
+
     return Session()
 
 

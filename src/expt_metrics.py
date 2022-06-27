@@ -11,30 +11,39 @@ import copy
 from dataclasses import dataclass, field
 from datetime import datetime
 import json
+import math
 import pprint
 import traceback
-from db_action_response import DbActionResponse
-import score_table_models as stm
-from score_table_models import Experiment as exp
-from score_table_models import ExperimentMetric as ex_mt
-from experiments import Experiment, ExperimentData
-from experiments import ExperimentRequest
-import regions as rgs
-import metric_types as mt
+
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
+from sqlalchemy import Integer, String, Boolean, DateTime, Float
 import psycopg2
-
-
+import pandas as pd
 from pandas import DataFrame
-import sqlalchemy as db
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.inspection import inspect
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import asc, desc
 from sqlalchemy.sql import func
+from sqlalchemy.orm import joinedload
+
+
+from db_action_response import DbActionResponse
+import score_table_models as stm
+from score_table_models import Experiment as exp
+from score_table_models import ExperimentMetric as ex_mt
+from score_table_models import MetricType as mts
+from score_table_models import Region as rgs
+from experiments import Experiment, ExperimentData
+from experiments import ExperimentRequest
+import regions as rg
+import metric_types as mt
+
+
 
 psycopg2.extensions.register_adapter(np.int64, psycopg2._psycopg.AsIs)
+psycopg2.extensions.register_adapter(np.float32, psycopg2._psycopg.AsIs)
 
 INSERT = 'INSERT'
 UPDATE = 'UPDATE'
@@ -54,7 +63,7 @@ HTTP_PUT = 'PUT'
 
 VALID_METHODS = [HTTP_GET, HTTP_PUT]
 
-DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d_%H:%M:%S'
+DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
 
 
 ExptMetricInputData = namedtuple(
@@ -79,11 +88,14 @@ ExptMetricsData = namedtuple(
         'elevation_unit',
         'value',
         'time_valid',
+        'expt_id',
         'expt_name',
         'wallclock_start',
+        'metric_id',
         'metric_type',
         'metric_unit',
         'metric_stat_type',
+        'region_id',
         'region',
         'created_at'
     ],
@@ -175,7 +187,7 @@ def get_time(value, datetime_format=None):
         
     try:
         parsed_time = datetime.strptime(
-            value, DEFAULT_DATETIME_FORMAT_STR
+            value, datetime_format
         )
     except Exception as err:
         msg = 'Invalid datetime format, must be ' \
@@ -199,7 +211,7 @@ def get_time_filter(filter_dict, cls, key, constructed_filter):
         return constructed_filter
 
     exact_datetime = get_time(value.get(EXACT_DATETIME))
-    print(f'exact_datetime: {exact_datetime}')
+
     if exact_datetime is not None:
         constructed_filter[key] = (
             getattr(cls, key) == exact_datetime
@@ -208,9 +220,6 @@ def get_time_filter(filter_dict, cls, key, constructed_filter):
 
     from_datetime = get_time(value.get(FROM_DATETIME))
     to_datetime = get_time(value.get(TO_DATETIME))
-    
-    
-    print(f'Column \'{key}\' is of type {type(getattr(cls, key).type)}.')
 
     if from_datetime is not None and to_datetime is not None:
         if to_datetime < from_datetime:
@@ -248,9 +257,11 @@ def validate_list_of_strings(values):
             msg = 'all values must be string type - value: ' \
                 f'{value} is type: {type(value)}'
             raise TypeError(msg)
+    
+    return values
 
 
-def get_string_filter(filter_dict, cls, key, constructed_filter):
+def get_string_filter(filter_dict, cls, key, constructed_filter, key_name):
     if not isinstance(filter_dict, dict):
         msg = f'Invalid type for filters, must be \'dict\', actually ' \
             f'type: {type(filter_dict)}'
@@ -267,12 +278,12 @@ def get_string_filter(filter_dict, cls, key, constructed_filter):
     like_filter = string_flt.get('like')
     # prefer like search over exact match if both exist
     if like_filter is not None:
-        constructed_filter[key] = (getattr(cls, key).like(like_filter))
+        constructed_filter[key_name] = (getattr(cls, key).like(like_filter))
         return constructed_filter
 
     exact_match_filter = validate_list_of_strings(string_flt.get('exact'))
     if exact_match_filter is not None:
-        constructed_filter[key] = (getattr(cls, key).in_(exact_match_filter))
+        constructed_filter[key_name] = (getattr(cls, key).in_(exact_match_filter))
 
     return constructed_filter
 
@@ -289,7 +300,7 @@ def get_experiments_filter(filter_dict, constructed_filter):
         raise TypeError(msg)   
     
     constructed_filter = get_string_filter(
-        filter_dict, exp, 'name', constructed_filter)
+        filter_dict, exp, 'name', constructed_filter, 'experiment_name')
     
     constructed_filter = get_time_filter(
         filter_dict, exp, 'cycle_start', constructed_filter)
@@ -318,16 +329,33 @@ def get_metric_types_filter(filter_dict, constructed_filter):
         raise TypeError(msg)   
     
     constructed_filter = get_string_filter(
-        filter_dict, mt, 'name', constructed_filter)
+        filter_dict,
+        mts,
+        'name',
+        constructed_filter,
+        'metric_type_name'
+    )
     
     constructed_filter = get_string_filter(
-        filter_dict, mt, 'measurement_type', constructed_filter)
+        filter_dict, mts,
+        'measurement_type',
+        constructed_filter,
+        'metric_type_measurement_type'
+    )
     
     constructed_filter = get_string_filter(
-        filter_dict, mt, 'measurement_unit', constructed_filter)
+        filter_dict, mts,
+        'measurement_units',
+        constructed_filter,
+        'metric_type_measurement_units'
+    )
     
     constructed_filter = get_string_filter(
-        filter_dict, mt, 'stat_type', stat_type)
+        filter_dict, mts,
+        'stat_type',
+        constructed_filter,
+        'metric_type_stat_type'
+    )
 
     return constructed_filter
 
@@ -344,10 +372,10 @@ def get_regions_filter(filter_dict, constructed_filter):
     if not isinstance(constructed_filter, dict):
         msg = 'Invalid type for constructed_filter, must be \'dict\', ' \
             f'actually type: {type(filter_dict)}'
-        raise TypeError(msg)   
-    
+        raise TypeError(msg)
+
     constructed_filter = get_string_filter(
-        filter_dict, rgs, 'name', constructed_filter)
+        filter_dict, rgs, 'name', constructed_filter, 'rgs_name')
 
     return constructed_filter
 
@@ -388,7 +416,6 @@ def build_column_ordering(cls, ordering):
 
     constructed_ordering = []
     for value in ordering:
-        print(f'value: {value}')
 
         if type(value) != dict:
             msg = f'List items must be a type-dict - was {type(value)}'
@@ -409,8 +436,8 @@ def build_column_ordering(cls, ordering):
 def get_expt_record(body):
 
     # get experiment name
-    engine = stm.get_engine_from_settings()
     session = stm.get_session()
+
     expt_name = body.get('expt_name')
     datestr_format = body.get('datestr_format')
     wlclk_strt_str = body.get('expt_wallclock_start')
@@ -418,7 +445,7 @@ def get_expt_record(body):
         wlclk_strt_str,
         datestr_format
     )
-
+    
     expt_request = {
         'name': 'experiment',
         'method': 'GET',
@@ -438,8 +465,13 @@ def get_expt_record(body):
         }
     }
 
+    print(f'expt_request: {expt_request}')
+
     er = ExperimentRequest(expt_request)
+
     results = er.submit()
+    print(f'results: {results}')
+
     record_cnt = 0
     try:
         if results.success is True:
@@ -487,9 +519,7 @@ class ExptMetricRequest:
             self.filters = self.params.get('filters')
             self.ordering = self.params.get('ordering')
             self.record_limit = self.params.get('record_limit')
-        
-        print(f'self.params: {self.params}')
-        print(f'self.filters: {self.filters}')
+
 
     def submit(self):
 
@@ -504,14 +534,17 @@ class ExptMetricRequest:
                 return self.failed_request(error_msg)
         elif self.method == HTTP_PUT:
             # becomes an update if record exists
+            print(f'in PUT method')
             try:
-                return self.put_expt_metrics_data()
+                response = self.put_expt_metrics_data()
             except Exception as err:
                 trcbk = traceback.format_exc()
                 error_msg = 'Failed to insert experiment metric records -' \
                     f' trcbk: {trcbk}'
                 print(f'Submit PUT error: {error_msg}')
                 return self.failed_request(error_msg)
+
+            return response
 
 
     def failed_request(self, error_msg):
@@ -550,6 +583,7 @@ class ExptMetricRequest:
             print(f'constructed_filters: {constructed_filter}')
             try:
                 for key, value in constructed_filter.items():
+                    print(f'adding filter: {value}')
                     query = query.filter(value)
             except Exception as err:
                 msg = f'Problems adding filter to query - query: {query}, ' \
@@ -579,7 +613,7 @@ class ExptMetricRequest:
         unique_metric_types = set()
         for metric in metrics:
 
-            print(f'metric: {metric}')
+            # print(f'metric: {metric}')
             if not isinstance(metric, ExptMetricInputData):
                 msg = 'Each metric must be a type ' \
                     f'\'{type(ExptMetricInputData)}\' was \'{metric}\''
@@ -589,11 +623,8 @@ class ExptMetricRequest:
             unique_regions.add(metric.region_name)
             unique_metric_types.add(metric.name)
 
-        regions = rgs.get_regions_from_name_list(list(unique_regions))
-        print(f'regions.details: {regions.details}')
-        print(f'unique_metric_types: {unique_metric_types}')
+        regions = rg.get_regions_from_name_list(list(unique_regions))
         metric_types = mt.get_all_metric_types()
-        print(f'metric_types.details: {metric_types.details}')
 
         rg_df = regions.details.get('records')
         if rg_df.shape[0] != len(unique_regions):
@@ -604,32 +635,33 @@ class ExptMetricRequest:
             raise ExptMetricsError(msg)
 
         print(f'regions: {rg_df}')
+        rg_df_dict = dict(zip(rg_df.name, rg_df.id))
+        print(f'rg_df_dict: {rg_df_dict}')
 
         mt_df = metric_types.details.get('records')
-        print(f'metric_types_df: {mt_df}')
-        # metrics_df = DataFrame(metrics, columns=ExptMetricInputData._fields)
+        mt_df_nm_id = mt_df[['id', 'name']].copy()
+        mt_df_dict = dict(zip(mt_df_nm_id.name, mt_df_nm_id.id))
+
         records = []
         for row in metrics:
-            print(f'row.name: {row.name}')
-            metric_type_id = mt_df.loc[mt_df['name'] == row.name, 'id'].item()
-            region_id = rg_df.loc[
-                rg_df['name'] == row.region_name, 'id'
-            ].item()
-            print(f'metric_type_id: {metric_type_id}, region_id: {region_id}')
+            
+            value = row.value
 
+            if math.isnan(value):
+                value = None
+            
             item = ex_mt(
                 experiment_id=self.expt_id,
-                metric_type_id=metric_type_id,
-                region_id=region_id,
+                metric_type_id=mt_df_dict[row.name],
+                region_id=rg_df_dict[row.region_name],
                 elevation=row.elevation,
                 elevation_unit=row.elevation_unit,
-                value=row.value,
+                value=value,
                 time_valid=row.time_valid
             )
 
-            print(f'item: {item}')
             records.append(item)
-        
+
         return records
 
 
@@ -639,17 +671,10 @@ class ExptMetricRequest:
                 f'{type(body)}'
             print(f'Metrics key not found: {error_msg}')
             raise ExptMetricsError(error_msg)
-        
-        # parse experiment name from body
-        # parse method type from body
-        # parse experiment metric data from body and transform into pandas df
-        # get date format from body
 
         metrics = body.get('metrics')
         parsed_metrics = self.parse_metrics_data(metrics)
 
-        
-        
         return parsed_metrics
 
     
@@ -658,25 +683,27 @@ class ExptMetricRequest:
         # we need to determine the primary key id from the experiment
         # all calls to this function must return a DbActionResponse object
         expt_record = get_expt_record(self.body)
-        print(f'expt_record: {expt_record}')
         expt_id = self.get_first_expt_id_from_df(expt_record)
-        print(f'In put_expt_metrics_data: expt_id: {self.expt_id}')
         records = self.get_expt_metrics_from_body(self.body)
-
-        engine = stm.get_engine_from_settings()
         session = stm.get_session()
 
         try:
             if len(records) > 0:
                 print(f'records: {records}')
-                print(f'ex_mt: {ex_mt}')
+                for record in records:
+                    msg = f'record.experiment_id: {record.experiment_id}, '
+                    msg += f'record.metric_type_id: {record.metric_type_id}, '
+                    msg += f'record.region_id: {record.region_id}, '
+                    msg += f'record.elevation: {record.elevation}, '
+                    msg += f'record.elevation_unit: {record.elevation_unit}, '
+                    msg += f'record.value: {record.value}, '
+                    msg += f'record.time_valid: {record.time_valid}, '
+                    msg += f'record.created_at: {record.created_at}'
+                    print(f'record: {msg}')
+
                 session.bulk_save_objects(records)
                 session.commit()
                 session.close()
-                # insert_stmt = insert(ex_mt).values(records).returning(ex_mt.id)
-                # print(f'insert_stmt: {insert_stmt}')
-                # ids = session.execute(insert_stmt).fetchall()
-                # print(f'inserted ids: {ids}')
 
         except Exception as err:
             print(f'Failed to insert records: {err}')
@@ -687,7 +714,15 @@ class ExptMetricRequest:
         session = stm.get_session()
 
         # set basic query
-        q = session.query(ex_mt)
+        q = session.query(
+            ex_mt
+        ).join(
+            exp, ex_mt.experiment
+        ).join(
+            mts, ex_mt.metric_type
+        ).join(
+            rgs, ex_mt.region
+        )
 
         # add filters
         q = self.construct_filters(q)
@@ -699,7 +734,8 @@ class ExptMetricRequest:
                 q = q.order_by(ordering_item)
 
         metrics = q.all()
-        print(f'metrics: {metrics}')
+
+        print(f'len(metrics): {len(metrics)}')
         parsed_metrics = []
         for metric in metrics:
             record = ExptMetricsData(
@@ -709,37 +745,45 @@ class ExptMetricRequest:
                 elevation_unit=metric.elevation_unit,
                 value=metric.value,
                 time_valid=metric.time_valid,
+                expt_id=metric.experiment.id,
                 expt_name=metric.experiment.name,
                 wallclock_start=metric.experiment.wallclock_start,
+                metric_id=metric.metric_type.id,
                 metric_type=metric.metric_type.measurement_type,
                 metric_unit=metric.metric_type.measurement_units,
                 metric_stat_type=metric.metric_type.stat_type,
+                region_id=metric.region.id,
                 region=metric.region.name,
                 created_at=metric.created_at
             )
             parsed_metrics.append(record)
-            print(f'metric.metric_type: {metric.metric_type.name}')
-            print(f'experiment: {metric.experiment.name}')
-            print(f'metric: {metric.__dict__}')
+            # print(f'metric.metric_type: {metric.metric_type.name}')
+            # print(f'experiment: {metric.experiment.name}')
+            # print(f'metric: {metric.__dict__}')
         
-
-
+        try:
+            metrics_df = DataFrame(
+                parsed_metrics,
+                columns=ExptMetricsData._fields
+            )
+        except Exception as err:
+            trcbk = traceback.format_exc()
+            msg = f'Problem casting exeriment metrics query output into pandas ' \
+                f'DataFrame - err: {trcbk}'
+            raise TypeError(msg) from err
+        
+        unique_metrics = self.remove_metric_duplicates(metrics_df)
 
         # # limit number of returned records
         # if self.record_limit is not None:
         #     q = q.limit(self.record_limit)
 
-        # experiments = q.all()
-
-        results = DataFrame()
+        results = DataFrame()   
         error_msg = None
         record_count = 0
         try:
             if len(parsed_metrics) > 0:
-                results = DataFrame(
-                    parsed_metrics,
-                    columns = parsed_metrics[0]._fields
-                )
+                results = unique_metrics
             
         except Exception as err:
             message = 'Request for experiment metric records FAILED'
@@ -769,3 +813,35 @@ class ExptMetricRequest:
         print(f'response: {response}')
 
         return response
+
+
+    def remove_metric_duplicates(self, m_df):
+        
+        start_records = m_df.shape[0]
+        print(f'starting records: {start_records}')
+
+        try:
+
+            uf = m_df.sort_values(
+                'created_at'
+            ).drop_duplicates(
+                [
+                    'name',
+                    'elevation',
+                    'elevation_unit',
+                    'time_valid',
+                    'expt_id',
+                    'metric_id',
+                    'region_id'
+                ],
+                keep='last'
+            )
+
+        except Exception as err:
+            trcbk = traceback.format_exc()
+            msg = f'Failed to drop duplicates - err: {trcbk}'
+            raise ValueError(msg)
+        
+        end_records = uf.shape[0]
+        print(f'ending records: {end_records}')
+        return uf

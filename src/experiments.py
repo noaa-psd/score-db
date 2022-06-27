@@ -52,7 +52,7 @@ HTTP_PUT = 'PUT'
 
 VALID_METHODS = [HTTP_GET, HTTP_PUT]
 
-DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d_%H:%M:%S'
+DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
 
 ExperimentData = namedtuple(
     'ExperimentData',
@@ -381,7 +381,7 @@ class ExperimentRequest:
 
     def __post_init__(self):
         method = self.request_dict.get('method')
-        self.method = validate_method(self.request_dict.get('method'))
+        self.method = validate_method(method)
         self.params = self.request_dict.get('params')
         self.filters = None
         self.ordering = None

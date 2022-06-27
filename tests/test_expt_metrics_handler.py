@@ -28,16 +28,6 @@ EXPERIMENT_CONFIG_FILE = os.path.join(
     'experiment_description.json'
 )
 
-    # 'ExptMetricInputData',
-    # [
-    #     'name',
-    #     'region_name',
-    #     'elevation',
-    #     'elevation_unit',
-    #     'value',
-    #     'time_valid'
-    # ],
-
 
 # def test_put_exp_metrics_request_dict():
 
@@ -46,12 +36,12 @@ EXPERIMENT_CONFIG_FILE = os.path.join(
 #         'method': 'PUT',
 #         'body': {
 #             'expt_name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AZURE_HC44RS_122015',
-#             'expt_wallclock_start': '2022-08-03_02:40:34',
+#             'expt_wallclock_start': '2022-08-03 02:40:34',
 #             'metrics': [
-#                 ExptMetricInputData('innov_stats_temperature_rmse', 'global', '0', 'kpa', 2.6, '2015-12-02_06:00:00'),
-#                 ExptMetricInputData('innov_stats_uvwind_rmse', 'tropics', '50', 'kpa', 2.8, '2015-12-02_06:00:00')
+#                 ExptMetricInputData('innov_stats_temperature_rmsd', 'global', '0', 'kpa', 2.6, '2015-12-02 06:00:00'),
+#                 ExptMetricInputData('innov_stats_uvwind_rmsd', 'tropics', '50', 'kpa', 2.8, '2015-12-02 06:00:00')
 #             ],
-#             'datestr_format': '%Y-%m-%d_%H:%M:%S'
+#             'datestr_format': '%Y-%m-%d %H:%M:%S'
 #         }
 #     }
 
@@ -65,33 +55,39 @@ def test_send_get_request():
         'name': 'experiment',
         'method': 'GET',
         'params': {
-            'datestr_format': '%Y-%m-%d_%H:%M:%S',
+            'datestr_format': '%Y-%m-%d %H:%M:%S',
             'filters': {
                 'experiments': {
                     'name': {
-                        'exact': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AZURE_HC44RS_122015',
+                        'exact': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_122015_HC44RS_lstr_tst',
                     },
                     'wallclock_start': {
-                        'from': '2022-08-03_02:00:00',
-                        'to': '2022-08-03_06:00:00'
+                        'from': '2022-08-03 02:00:00',
+                        'to': '2022-08-03 06:00:00'
                     }
                 },
-                # 'metric_types': {
-                    # 'name': {
-                        # 'exact': 'innov_stats_temperature_rmse'
-                    # },
-                # },
-                # 'regions': {
-
-                # },
+                'metric_types': {
+                    'name': {
+                        'exact': ['innov_stats_temperature_rmsd']
+                    },
+                    'stat_type': {
+                        'exact': ['rmsd']
+                    }
+                },
+                'regions': {
+                    'name': {
+                        'exact': ['global']
+                    },
+                },
 
                 'time_valid': {
-                    'from': '2015-01-01_00:00:00',
-                    'to': '2016-01-03_00:00:00',
+                    'from': '2015-01-01 00:00:00',
+                    'to': '2016-01-03 00:00:00',
                 },
             },
             'ordering': [
-                {'name': 'created_at', 'order_by': 'desc'}
+                # {'name': 'id', 'order_by': 'asc'}
+                {'name': 'time_valid', 'order_by': 'asc'}
             ]
         }
     }
