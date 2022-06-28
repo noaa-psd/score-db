@@ -29,25 +29,25 @@ EXPERIMENT_CONFIG_FILE = os.path.join(
 )
 
 
-# def test_put_exp_metrics_request_dict():
+def test_put_exp_metrics_request_dict():
 
-#     request_dict = {
-#         'name': 'expt_metrics',
-#         'method': 'PUT',
-#         'body': {
-#             'expt_name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AZURE_HC44RS_122015',
-#             'expt_wallclock_start': '2022-08-03 02:40:34',
-#             'metrics': [
-#                 ExptMetricInputData('innov_stats_temperature_rmsd', 'global', '0', 'kpa', 2.6, '2015-12-02 06:00:00'),
-#                 ExptMetricInputData('innov_stats_uvwind_rmsd', 'tropics', '50', 'kpa', 2.8, '2015-12-02 06:00:00')
-#             ],
-#             'datestr_format': '%Y-%m-%d %H:%M:%S'
-#         }
-#     }
+    request_dict = {
+        'name': 'expt_metrics',
+        'method': 'PUT',
+        'body': {
+            'expt_name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AZURE_HC44RS_122015',
+            'expt_wallclock_start': '2022-08-03 02:40:34',
+            'metrics': [
+                ExptMetricInputData('innov_stats_temperature_rmsd', 'global', '0', 'kpa', 2.6, '2015-12-02 06:00:00'),
+                ExptMetricInputData('innov_stats_uvwind_rmsd', 'tropics', '50', 'kpa', 2.8, '2015-12-02 06:00:00')
+            ],
+            'datestr_format': '%Y-%m-%d %H:%M:%S'
+        }
+    }
 
-#     emr = ExptMetricRequest(request_dict)
-#     result = emr.submit()
-#     print(f'Experiment metrics PUT result: {result}')
+    emr = ExptMetricRequest(request_dict)
+    result = emr.submit()
+    print(f'Experiment metrics PUT result: {result}')
 
 def test_send_get_request():
 
