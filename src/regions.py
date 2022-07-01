@@ -5,7 +5,10 @@ All rights reserved.
 Collection of methods and classes to facilitate insertion and selection
 of records into/from the 'regions' table.  The region table includes the
 following columns ['name', 'bounds', 'created_at', 'updated_at'] and each
-row's id serves as a foreign key to the 'expt_metrics' table.
+row's id serves as a foreign key to the 'expt_metrics' table.  A unique
+region consists of a combination of the name and the bounds values.
+Multiple regions with the same 'name' value are allowed as long as the
+'bounds' values are different.
 
 
 """
