@@ -10,6 +10,9 @@ region consists of a combination of the name and the bounds values.
 Multiple regions with the same 'name' value are allowed as long as the
 'bounds' values are different.
 
+Each experiment metric is associated with a region (through the region's
+foreign key 'id') in order to limit duplicated data.
+
 
 """
 from collections import namedtuple
