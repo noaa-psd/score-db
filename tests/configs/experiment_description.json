@@ -1,0 +1,361 @@
+{
+    "archive_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/archive_config.yaml",
+    "atmos": {
+        "atmos_general": {
+            "bkgrdfcst_products_yaml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/products/bkgrd_forecast.C96.yaml",
+            "calendar": 2,
+            "coupler_file_prefix": "ufs.cpld.cpl.r",
+            "data_table_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/data_table.tmpl",
+            "deterministic": {
+                "coupling_interval_sec": 900,
+                "do_ca": true,
+                "dt_atmos": 900,
+                "fv3_nml_params": {
+                    "bl_mynn_edmf": 1,
+                    "bl_mynn_edmf_mom": 1,
+                    "bl_mynn_tkeadvect": true,
+                    "ccpp_suite": "FV3_GFS_v16_coupled_nsstNoahmpUGWPv1",
+                    "d2_bg_k1": 0.15,
+                    "d2_bg_k2": 0.04,
+                    "dddmp": 0.2,
+                    "dnats": 1,
+                    "do_sat_adj": true,
+                    "do_ugwp_v1_orog_only": false,
+                    "fscav_aero": "*:0.0",
+                    "hord_dp": -5,
+                    "hord_mt": 5,
+                    "hord_tm": 5,
+                    "hord_tr": 8,
+                    "hord_vt": 5,
+                    "hybedmf": false,
+                    "iaer": 1011,
+                    "ialb": 2,
+                    "iems": 2,
+                    "imp_physics": 11,
+                    "k_split": 2,
+                    "knob_ugwp_dokdis": 2,
+                    "knob_ugwp_ndx4lh": 4,
+                    "lheatstrg": true,
+                    "n_split": 6,
+                    "n_sponge": 42,
+                    "nstf_name": "2,1,0,0",
+                    "rf_cutoff": 7500.0,
+                    "tau": 10.0
+                },
+                "input_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/input.nml.tmpl",
+                "med_modelio_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/med_modelio.nml.tmpl",
+                "pio_in_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/pio_in.tmpl"
+            },
+            "diag_table_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/diag_table.tmpl",
+            "ensemble": {
+                "coupling_interval_sec": 900,
+                "do_ca": true,
+                "do_iau": true,
+                "do_stochy": true,
+                "dt_atmos": 900,
+                "fv3_nml_params": {
+                    "bl_mynn_edmf": 1,
+                    "bl_mynn_edmf_mom": 1,
+                    "bl_mynn_tkeadvect": true,
+                    "ccpp_suite": "FV3_GFS_v16_coupled_nsstNoahmpUGWPv1",
+                    "d2_bg_k1": 0.15,
+                    "d2_bg_k2": 0.04,
+                    "dddmp": 0.2,
+                    "dnats": 1,
+                    "do_sat_adj": true,
+                    "do_ugwp_v1_orog_only": false,
+                    "fhstoch": 9,
+                    "fscav_aero": "*:0.0",
+                    "hord_dp": -5,
+                    "hord_mt": 5,
+                    "hord_tm": 5,
+                    "hord_tr": 8,
+                    "hord_vt": 5,
+                    "hybedmf": false,
+                    "iaer": 1011,
+                    "ialb": 2,
+                    "iau_filter_increments": false,
+                    "iems": 2,
+                    "imp_physics": 11,
+                    "k_split": 2,
+                    "knob_ugwp_dokdis": 2,
+                    "knob_ugwp_ndx4lh": 4,
+                    "lheatstrg": true,
+                    "n_split": 6,
+                    "n_sponge": 42,
+                    "new_lscale": true,
+                    "nstf_name": "2,1,0,0",
+                    "rf_cutoff": 7500.0,
+                    "shum": 0.005,
+                    "shum_lscale": 5000000,
+                    "shum_tau": 21600,
+                    "skeb": 0.3,
+                    "skeb_lscale": 250000,
+                    "skeb_npass": 30,
+                    "skeb_tau": 21600,
+                    "skeb_vdof": 5,
+                    "skebint": 0,
+                    "skebnorm": 0,
+                    "sppt": 0.5,
+                    "sppt_logit": true,
+                    "sppt_lscale": 500000,
+                    "sppt_sfclimit": true,
+                    "sppt_tau": 21600,
+                    "stochini": false,
+                    "tau": 10.0,
+                    "use_zmtnblck": true
+                },
+                "input_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/input.nml.tmpl",
+                "med_modelio_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/med_modelio.nml.tmpl",
+                "niter": 1,
+                "pio_in_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/pio_in.tmpl"
+            },
+            "field_table_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/field_table.tmpl",
+            "model_configure_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/model_configure.tmpl",
+            "restart_freq_seconds": 10800,
+            "update_landsfc": true,
+            "vcoord_filepath": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/fv3/fix_am/global_hyblev.l128.txt"
+        },
+        "atmos_grid": {
+            "cubed_sphere_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/grids/atmos",
+            "deterministic": {
+                "resolution": "C96"
+            },
+            "ensemble": {
+                "resolution": "C96"
+            },
+            "fix_orog_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/fv3/fix_orog",
+            "fix_orog_yaml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/fix_orog.yaml",
+            "fix_sfc_climo_gen_nml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/sfc_climo_gen.nml.tmpl",
+            "fix_sfc_climo_gen_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/fv3/fix_sfc_climo",
+            "fix_sfc_climo_gen_yaml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/fix_sfc_climo_gen.yaml",
+            "nlevs": 127,
+            "scrub": true
+        },
+        "atmos_ics": {
+            "chgres_cube_nml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/chgres_cube.nml",
+            "deterministic": {
+                "resolution": "C768"
+            },
+            "ensemble": {
+                "resolution": "C384"
+            },
+            "file_type": "nemsio",
+            "grids_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/grids/atmos",
+            "nemsio": {
+                "cntrl_sfc_filename": "bfg_%Y%m%d%H_fhr00_control",
+                "tracers_input": "spfh, clwmr, o3mr, icmr, rwmr, snmr, grle"
+            },
+            "restart": {
+                "tracer_inputs": "sphum, liq_wat, o3mr, ice_wat, rainwat, snowwat, graupel"
+            },
+            "scrub": true,
+            "tracers": "sphum, liq_wat, o3mr, ice_wat, rainwat, snowwat, graupel"
+        }
+    },
+    "containers": {
+        "analysis_remapper_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/apps/analysis_remapper.C961p0.yaml",
+        "analysis_remapper_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_analysisremapper.sif",
+        "cice_remapper_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/apps/cice_remapper.yaml",
+        "cice_remapper_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ciceremapper.sif",
+        "cylc_graph_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_cylcgraph.sif",
+        "gsi_convdiags_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/diagnostics/gsi/gsi_convdiags.3dvar.yaml",
+        "gsi_convdiags_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsiconvdiags.sif",
+        "gsi_obsverif_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/diagnostics/gsi/gsi_obsverif.yaml",
+        "gsi_obsverif_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsiobsverif.sif",
+        "mom6_remapper_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/apps/mom6_remapper.yaml",
+        "mom6_remapper_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_mom6remapper.sif",
+        "mom6_rstrt2ic_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/apps/mom6_rstrt2ic.yaml",
+        "mom6_rstrt2ic_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_mom6rstrt2ic.sif",
+        "soca_insitudiags_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/diagnostics/soca/soca_insitudiags.3dvar.yaml",
+        "soca_insitudiags_sif": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_socainsitudiags.sif"
+    },
+    "data_assimilation": {
+        "atmos": {
+            "da_option": 1,
+            "enkf_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/gsi/enkf.C96.yaml",
+            "gsi_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/gsi/gsi.C96.gefs_v13_reanalysis.yaml",
+            "gsi_post": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/gsi/gsi_post.yaml"
+        },
+        "ocean": {
+            "da_option": 1,
+            "soca_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/jedi/soca.yaml",
+            "soca_post": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/jedi/soca/soca_post.yaml"
+        }
+    },
+    "database": {
+        "conventional_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/database/conventional.yaml",
+        "ozone_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/database/ozone.yaml",
+        "satellites_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/database/satellites.yaml"
+    },
+    "executables": {
+        "chgres_cube": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_chgres_cube.x",
+        "ensemble_chgres": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ensemble_chgres.x",
+        "ensemble_recenter": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ensemble_recenter.x",
+        "ensemble_sfcmean": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ensemble_sfcmean.x",
+        "ensemble_sigmean": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ensemble_sigmean.x",
+        "forecast": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_forecast.x",
+        "gfdl_tracker": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gfdltracker.x",
+        "globalcycle": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_global_cycle.x",
+        "gsi": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi.x",
+        "gsi_analysis": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi_analysis.x",
+        "gsi_enkf": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi_enkf.x",
+        "gsi_ens_increment": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi_ens_increment.x",
+        "gsi_increment": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi_increment.x",
+        "gsi_observer": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_gsi_observer.x",
+        "make_hgrid": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_make_hgrid.x",
+        "make_solo_mosaic": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_make_solo_mosaic.x",
+        "ncdiag_cat": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_ncdiag_cat.x",
+        "orog": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_orog.x",
+        "recenter_ensperts_interp": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_recenter_ensperts_interp.x",
+        "sfc_climo_gen": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_sfc_climo_gen.x",
+        "soca_checkpoint_model": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_checkpoint_model.x",
+        "soca_convertstate": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_convertstate.x",
+        "soca_enspert": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_enspert.x",
+        "soca_gridgen": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_gridgen.x",
+        "soca_letkf": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_letkf.x",
+        "soca_staticbinit": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_staticbinit.x",
+        "soca_var": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/exec/ufsrnr_jedi_soca_var.x"
+    },
+    "ice": {
+        "ice_general": {
+            "deterministic": {
+                "dt": 900,
+                "input_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/ice_in.tmpl"
+            },
+            "ensemble": {
+                "dt": 900,
+                "input_nml_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/ice_in.tmpl"
+            },
+            "initconds_basename": "cice5.ic.nc"
+        },
+        "ice_grid": {
+            "deterministic": {
+                "resolution": 1.0
+            },
+            "ensemble": {
+                "resolution": 1.0
+            },
+            "fix_grid_yaml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/fix_cice_grid.yaml",
+            "grid_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/grids/ice",
+            "scrub": true
+        },
+        "ice_inputs": {
+            "io_file_info": {
+                "input_name": "cice5_model_0.25.res",
+                "link_prefix": "CICE.res",
+                "link_suffix": ".nc"
+            }
+        },
+        "ice_obsprep": {
+            "scrub": true
+        }
+    },
+    "ocean": {
+        "ocean_general": {
+            "deterministic": {
+                "dt": 900,
+                "dt_therm": 3600
+            },
+            "ensemble": {
+                "dt": 900,
+                "dt_therm": 3600
+            },
+            "initconds_basename": "MOM6.ic.nc",
+            "mom_input_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/MOM_input.tmpl",
+            "mom_override_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/MOM_override.tmpl",
+            "mom_resolution_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/MOM_resolution.tmpl"
+        },
+        "ocean_grid": {
+            "deterministic": {
+                "resolution": 1.0
+            },
+            "ensemble": {
+                "resolution": 1.0
+            },
+            "fix_grid_yaml": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/fix_mom6_grid.yaml",
+            "grid_path": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/fix/grids/ocean",
+            "nlevs": 75,
+            "scrub": true
+        },
+        "ocean_ics": {
+            "deterministic": {
+                "resolution": 0.25
+            },
+            "ensemble": {
+                "resolution": 1.0
+            },
+            "scrub": true
+        },
+        "ocean_inputs": {
+            "MOM0p25": {
+                "chl_varname": "chlor_a",
+                "liquid_runoff_from_data": true,
+                "mixedlayer_restrat": true,
+                "restart_checksums_required": false,
+                "use_kh_bg_2d": false
+            },
+            "MOM1p0": {
+                "chl_varname": "chl_a",
+                "liquid_runoff_from_data": true,
+                "mixedlayer_restrat": true,
+                "restart_checksums_required": false,
+                "use_kh_bg_2d": true
+            },
+            "io_file_info": {
+                "input_name": "MOM.res",
+                "link_prefix": "MOM.res",
+                "link_suffix": ".nc"
+            }
+        },
+        "ocean_obsprep": {
+            "avhrr_sst_metopa_thinning": 0.25,
+            "scrub": true
+        }
+    },
+    "ufs_rnr": {
+        "atmos_analysis_interval": 21600,
+        "atmos_analysis_time": "0, 21600, 43200, 64800, 86400",
+        "atmos_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/atmos.C96_L127.coupled.yaml",
+        "atmos_hpss_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/inputs_noaahpss.yaml",
+        "atmos_local_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/atmos/inputs_local.RDHPCS-Hera.yaml",
+        "aws_archive_com_creds": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/user_aws_credentials.yaml",
+        "aws_archive_com_freq": "* * * * *",
+        "aws_archive_com_hash": true,
+        "aws_archive_com_tarball": true,
+        "aws_archive_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/user_aws_credentials.yaml",
+        "aws_archive_post_creds": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/user_aws_credentials.yaml",
+        "aws_archive_post_freq": "* * * * *",
+        "aws_archive_post_hash": true,
+        "aws_archive_prod_creds": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/user_aws_credentials.yaml",
+        "aws_archive_prod_files": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/archive/archive.prod.C96.3DVAR.yaml",
+        "aws_archive_prod_freq": "0 0 * * 0,4",
+        "aws_archive_prod_hash": true,
+        "aws_archive_prod_tarball": true,
+        "aws_staging_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/staging/user_aws_credentials.NOAA-BDP.read_only.yaml",
+        "coupled": true,
+        "cycling_interval": 21600,
+        "domain": "global",
+        "fcst_proc_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/procs.configure.1p0.coupled.yaml",
+        "fetch_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/staging/fetch.RDHPCS-Hera.yaml",
+        "fix_files": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/fix.1p0.yaml",
+        "ice_analysis_interval": 86400,
+        "ice_analysis_time": 43200,
+        "ice_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/ice.yaml",
+        "ice_hpss_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/inputs_noaahpss.yaml",
+        "ice_www_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ice/inputs_www.yaml",
+        "ncepprods_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ncep_products/ncepprods.yaml",
+        "nems_configure_tmpl": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ufs_rnr/nems.configure.atmos-ocean-ice",
+        "noaa_hpss_path": "/ESRL/BMC/gsienkf/5year",
+        "ocean_analysis_interval": 86400,
+        "ocean_analysis_time": 43200,
+        "ocean_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/ocean.yaml",
+        "ocean_hpss_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/inputs_noaahpss.yaml",
+        "ocean_www_inputs": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/ocean/inputs_www.yaml",
+        "platform_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/platform/platform.yaml",
+        "production_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/production/production.1p0.yaml",
+        "scrub_freq_seconds": 43200,
+        "scrub_previous_cycles": true,
+        "store_config": "/contrib/home/builder/UFS-RNR-rel-v2.0.0-tag/parm/staging/store.RDHPCS-Hera.yaml"
+    }
+}
