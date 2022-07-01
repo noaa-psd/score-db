@@ -1,3 +1,14 @@
+"""
+Copyright 2022 NOAA
+All rights reserved.
+
+Collection of methods and classes to facilitate insertion and selection
+of records into/from the 'regions' table.  The region table includes the
+following columns ['name', 'bounds', 'created_at', 'updated_at'] and each
+row's id serves as a foreign key to the 'expt_metrics' table.
+
+
+"""
 from collections import namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -180,30 +191,6 @@ def get_filter_type(params):
             f'Must be one of [{VALID_FILTER_TYPES}]')
     return filter_type
 
-# def get_all_records(params):
-#     get_all = params.get('all', None)
-#     if get_all is None:
-#         return False
-#     if isinstance(get_all, bool):
-#         return get_all
-#     elif isinstance(get_all, int):
-#         return bool(get_all)
-#     elif not isinstance(get_all, str):
-#         raise ValueError('Invalid type %r for option %s; use '
-#                           '1/0, yes/no, true/false, on/off' % (
-#                               get_all, 'get_all'))
-#     elif get_all.lower() in ('1', 'yes', 'true', 't', 'y'):
-#         return True
-#     elif get_all.lower() in ('0', 'no', 'false', 'f', 'n'):
-#         return False
-#     else:
-#         raise ValueError('Invalid value %r for option %s; use '
-#                           '1/0, yes/no, true/false, y/n, t/f' % (
-#                               get_all, 'get_all')) 
-
-
-
-
 
 @dataclass
 class RegionRequest:
@@ -273,8 +260,6 @@ class RegionRequest:
 
             records = []
             records_hash_vals = []
-            # hash_val_list = existing_regions['unique_region'].tolist()
-            # print(f'hash_val_list: {hash_val_list}')
             # insert all records which do not match existing records
 
             for region in self.regions:
@@ -291,7 +276,7 @@ class RegionRequest:
                     )
                     records.append(item)
                     records_hash_vals.append(region.hash_val)
-            print(f'records: {records}')
+
             success = True
             error_msg = None
             record_count = 0
