@@ -89,21 +89,21 @@ def test_parse_request_dict():
         MetricType(
             'innov_stats_temperature_count',
             'temperature',
-            'celsius',
+            'kelvin',
             'count',
             description_temperature_count
         ),
         MetricType(
             'innov_stats_temperature_bias',
             'temperature',
-            'celsius',
+            'kelvin',
             'bias',
             description_temperature_bias
         ),
         MetricType(
             'innov_stats_temperature_rmsd',
             'temperature',
-            'celsius',
+            'kelvin',
             'rmsd',
             description_temperature_rmsd
         ),

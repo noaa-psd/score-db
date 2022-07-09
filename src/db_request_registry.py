@@ -13,6 +13,8 @@ from experiments import ExperimentRequest
 from db_action_response import DbActionResponse
 from expt_metrics import ExptMetricRequest
 from metric_types import MetricTypeRequest
+from harvest_innov_stats import HarvestInnovStatsRequest
+from plot_innov_stats import PlotInnovStatsRequest
 
 
 NAMED_TUPLES_LIST = 'tuples_list'
@@ -50,5 +52,15 @@ request_registry = {
         'Add or get or update metric types',
         MetricTypeRequest,
         DbActionResponse
-    ),  
+    ),
+    'harvest_innov_stats': RequestHandler(
+        'Gather and store innovation statistics from diagnostics files',
+        HarvestInnovStatsRequest,
+        DbActionResponse
+    ),
+    'plot_innov_stats': RequestHandler(
+        'plot innovation statistics',
+        PlotInnovStatsRequest,
+        DbActionResponse
+    ),
 }

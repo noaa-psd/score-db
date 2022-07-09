@@ -63,7 +63,7 @@ class Region:
     def __post_init__(self):
         if not isinstance(self.name, str):
             msg = f'name must be a string - name {self.name}'
-            raise ValueError(msg)
+            raise TypeError(msg)
         if (not isinstance(self.min_lat, float) or
             not isinstance(self.max_lat, float)):
             msg = f'min and max lat must be floats - min lat: {self.min_lat}' \
@@ -288,9 +288,6 @@ class RegionRequest:
 
             records = []
             records_hash_vals = []
-            # hash_val_list = existing_regions['unique_region'].tolist()
-            # print(f'hash_val_list: {hash_val_list}')
-            # insert all records which do not match existing records
 
             for region in self.regions:
                 if (
@@ -306,7 +303,6 @@ class RegionRequest:
                     )
                     records.append(item)
                     records_hash_vals.append(region.hash_val)
-            print(f'records: {records}')
             success = True
             error_msg = None
             record_count = 0
@@ -422,7 +418,6 @@ class RegionRequest:
             print(msg)
             return DataFrame()
 
-        # print(f'labels for existing_regions: {existing_regions[0]._fields}')
         session.close()
         if len(existing_regions) == 0:
             return DataFrame()

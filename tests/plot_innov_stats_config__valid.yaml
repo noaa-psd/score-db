@@ -1,0 +1,37 @@
+date_range:
+  datetime_str: '%Y-%m-%d %H:%M:%S'
+  end: '2016-01-31 18:00:00'
+  start: '2016-01-01 00:00:00'
+db_request_name: plot_innov_stats
+experiments:
+- graph_color: blue
+  graph_label: C96L64 GSI Uncoupled 3DVAR Experiment
+  name: C96L64.UFSRNR.GSI_3DVAR.012016
+  wallclock_start: '2021-07-22 09:22:05'
+- graph_color: red
+  graph_label: C96L64 GSI and SOCA Coupled 3DVAR Experiment
+  name: C96L64.UFSRNR.GSI_SOCA_3DVAR.012016
+  wallclock_start: '2021-07-24 11:31:16'
+fig_base_fn: C96L64_GSI_3DVAR_VS_GSI_SOCA_3DVAR
+stat_groups:
+- cycles:
+  - 0
+  - 21600
+  - 43200
+  - 64800
+  elevation_unit: plevs
+  metrics:
+  - temperature
+  - spechumid
+  - uvwind
+  regions:
+  - equatorial
+  - global
+  - north_hemis
+  - south_hemis
+  - tropics
+  stat_group_frmt_str: innov_stats_{metric}_{stat}
+  stats:
+  - bias
+  - rmsd
+work_dir: /home/slawrence/Development/score-db/tests/figures

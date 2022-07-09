@@ -1,0 +1,26 @@
+date_range:
+  datetime_str: '%Y-%m-%d %H:%M:%S'
+  end: '2016-01-31 18:00:00'
+  start: '2016-01-01 00:00:00'
+db_request_name: harvest_innov_stats
+expt_name: C96L64.UFSRNR.GSI_3DVAR.012016
+expt_wallclk_strt: '2021-07-22 09:22:05'
+files:
+- cycles:
+  - 0
+  - 21600
+  - 43200
+  - 64800
+  elevation_unit: plevs
+  filename: innov_stats.metric.%Y%m%d%H.nc
+  filepath: /home/slawrence/Development/experiment_data/uncoupled_c96_3dvar/gsi/
+  harvester: innov_stats_netcdf
+  metrics:
+  - temperature
+  - spechumid
+  - uvwind
+  stats:
+  - bias
+  - count
+  - rmsd
+output_format: tuples_list
