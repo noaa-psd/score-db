@@ -86,7 +86,7 @@ def main():
     file_utils.is_valid_readable_file(request_yaml)
 
     # Submit the score db request
-    handle_request(request_yaml)
+    return handle_request(request_yaml)
 
 
 # --------------------------------------------------------------------------------------------------

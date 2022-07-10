@@ -2,7 +2,14 @@
 Copyright 2022 NOAA
 All rights reserved.
 
-Collection of methods to facilitate handling of score db requests
+Collection of methods to facilitate insertion/selection of experiment
+records.  Each experiment record contains the following columns
+['id', 'cycle_start', cycle_stop', 'owner_id', 'group_id', 'experiment_type'
+'platform', 'wallclock_start', 'wallclock_end', 'description', 'created_at'
+'updated_at'].  The 'description' column is unstructured JSON and is meant
+to store the experiment configuration.  Using sqlalchemy, keys within the
+JSON column could be searched (although indexing should be addressed
+if the experiment table grows significantly).
 
 """
 
@@ -210,9 +217,34 @@ def get_time(value, datetime_format=None):
     return parsed_time
 
 
-def get_time_filter(filters, cls, key, constructed_filter):
-    if not isinstance(filters, dict):
-        msg = f'Invalid type for filters, must be \'dict\', actually ' \
+def get_time_filter(filter, cls, key, constructed_filter):
+    """
+        Build a datetime filter (otherwise known as a WHERE clause)
+
+        Parameters:
+        -----------
+        filters: dict - this time filter, allows 'from' key and 'to' key where
+            each are optional.  However, if neither 'from' or 'to' keys 
+            are provided, this method will simly not add a filter.
+            example dict: 
+            {
+                'from': '2015-01-01_00:00:00',
+                'to': '2018-01-01_00:00:00'
+            }
+        cls: class object - this object can be any sqlalchemy table object
+            such as Region, or Experiment
+        key: str - this is a column name from the 'cls' table object.  The
+            column defined by 'key' must be a DateTime type
+        constructed_filter: dict - this is a dictionary containing all of the
+            previously defined filter clauses.
+
+        Returns: dict - returns the constructed_filter dict containing the
+            newly created time filter pertaining to the table = 'cls' and
+            the DateTime column 'key'.
+
+        """
+    if not isinstance(filter, dict):
+        msg = f'Invalid type for filter, must be \'dict\', actually ' \
             f'type: {type(filters)}'
         raise TypeError(msg)
 
@@ -283,6 +315,53 @@ def get_string_filter(filters, cls, key, constructed_filter):
 
 
 def construct_filters(filters):
+    """
+    Build a set of filters (otherwise known as a WHERE clause) pertaining
+    to the experiments table.
+
+    Parameters:
+    -----------
+    filters: dict - this filter dict contains all the column data filter
+        information needed to build filter clauses.
+        example dict: 
+        {
+            'name': {
+                # 'like': '%_3DVAR_%',
+                'exact': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AWS_C5N18XL_122015'
+            },
+            'cycle_start': {
+                'from': '2015-01-01_00:00:00',
+                'to': '2018-01-01_00:00:00'
+            },
+            'cycle_stop': {
+                'from': '2015-01-01_00:00:00',
+                'to': '2018-01-01_00:00:00'
+            },
+            'owner_id': {
+                'exact': 'Steve.Lawrence@noaa.gov'
+            },
+            'group_id': {
+                    'exact': 'gsienkf'
+            },
+            'experiment_type': {
+                'like': '%COUPLED%'
+            },
+            'platform': {
+                'exact': 'pw_awv1'
+            },
+            'wallclock_start': {
+                'from': '2022-01-01_00:00:00',
+                'to': '2022-07-01_00:00:00'
+            },
+            'wallclock_end': {
+                'from': '2015-01-01_00:00:00',
+                'to': '2022-05-01_00:00:00'
+            }
+
+        }
+
+    """
+    
     constructed_filter = {}
 
     constructed_filter = get_string_filter(
@@ -335,6 +414,27 @@ def validate_order_dir(value):
 
 
 def build_column_ordering(cls, ordering):
+    """
+    Build a sequential list of column ordering (otherwise known as the 
+    ORDER BY clause)
+    pertaining
+    to the experiments table.
+
+    Parameters:
+    -----------
+    cls: class object - this object can be any sqlalchemy table object
+            such as Region, or Experiment
+ 
+    ordering: list - this is a list of dicts which describe all the desired
+        column data sequential ordering (or the ORDER BY sql clause).
+
+        example list of orderby dicts: 
+        [
+            {'name': 'group_id', 'order_by': 'desc'},
+            {'name': 'created_at', 'order_by': 'desc'}
+        ]
+
+    """
     if ordering is None:
         return None
     

@@ -1,3 +1,20 @@
+"""
+Copyright 2022 NOAA
+All rights reserved.
+
+Collection of methods and classes to facilitate insertion and selection
+of records into/from the 'regions' table.  The region table includes the
+following columns ['name', 'bounds', 'created_at', 'updated_at'] and each
+row's id serves as a foreign key to the 'expt_metrics' table.  A unique
+region consists of a combination of the name and the bounds values.
+Multiple regions with the same 'name' value are allowed as long as the
+'bounds' values are different.
+
+Each experiment metric is associated with a region (through the region's
+foreign key 'id') in order to limit duplicated data.
+
+
+"""
 from collections import namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -269,8 +286,6 @@ class RegionRequest:
 
             records = []
             records_hash_vals = []
-            # hash_val_list = existing_regions['unique_region'].tolist()
-            # print(f'hash_val_list: {hash_val_list}')
             # insert all records which do not match existing records
 
             for region in self.regions:
@@ -287,7 +302,7 @@ class RegionRequest:
                     )
                     records.append(item)
                     records_hash_vals.append(region.hash_val)
-            print(f'records: {records}')
+
             success = True
             error_msg = None
             record_count = 0
