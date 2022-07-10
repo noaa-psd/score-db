@@ -2,7 +2,9 @@
 Copyright 2022 NOAA
 All rights reserved.
 
-Collection of methods to facilitate handling of score db requests
+Collection of methods to facilitate handling of requests for experiment
+metrics (note: in order to request experiment metrics, the experiment
+registry, regions, and metric_types tables must also be accessed).
 
 """
 

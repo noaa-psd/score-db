@@ -185,26 +185,7 @@ def get_filter_type(params):
             f'Must be one of [{VALID_FILTER_TYPES}]')
     return filter_type
 
-# def get_all_records(params):
-#     get_all = params.get('all', None)
-#     if get_all is None:
-#         return False
-#     if isinstance(get_all, bool):
-#         return get_all
-#     elif isinstance(get_all, int):
-#         return bool(get_all)
-#     elif not isinstance(get_all, str):
-#         raise ValueError('Invalid type %r for option %s; use '
-#                           '1/0, yes/no, true/false, on/off' % (
-#                               get_all, 'get_all'))
-#     elif get_all.lower() in ('1', 'yes', 'true', 't', 'y'):
-#         return True
-#     elif get_all.lower() in ('0', 'no', 'false', 'f', 'n'):
-#         return False
-#     else:
-#         raise ValueError('Invalid value %r for option %s; use '
-#                           '1/0, yes/no, true/false, y/n, t/f' % (
-#                               get_all, 'get_all')) 
+
 def get_regions_from_name_list(region_names):
     request_dict = {
         'name': 'region',
