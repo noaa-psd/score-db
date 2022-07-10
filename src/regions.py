@@ -63,6 +63,11 @@ RegionData = namedtuple(
     ],
 )
 
+
+def RegionsError(Exception):
+    pass
+
+
 @dataclass
 class Region:
     ''' region object storing region name and min/max latitude bounds '''
@@ -198,6 +203,20 @@ def get_filter_type(params):
     return filter_type
 
 
+def get_regions_from_name_list(region_names):
+    request_dict = {
+        'name': 'region',
+        'method': 'GET',
+        'params': {'filter_type': 'by_name'},
+        'body': {
+            'regions': region_names
+        }
+    }
+
+    rr = RegionRequest(request_dict)
+    return rr.submit()
+    
+
 @dataclass
 class RegionRequest:
     request_dict: dict
@@ -252,7 +271,8 @@ class RegionRequest:
                 (error_msg is None),
                 message,
                 {
-                    'matched_records': matched_json
+                    'matched_records': matched_json,
+                    'records': matched_records
                 },
                 error_msg
             )
@@ -312,13 +332,13 @@ class RegionRequest:
                 message,
                 {
                     'inserted_records': inserts_json,
-                    'matched_records': matched_json
+                    'matched_records': matched_json,
+                    'records': matched_records
                 },
                 error_msg
             )
             print(f'response: {response}')
             return response
-
 
 
     def get_regions_by_name(self):
@@ -416,14 +436,3 @@ class RegionRequest:
             
         print(f'df: {df}')
         return df
-
-
-
-
-
-
-
-
-
-        
-        

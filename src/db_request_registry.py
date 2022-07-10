@@ -11,6 +11,8 @@ from collections import namedtuple
 from regions import RegionRequest
 from experiments import ExperimentRequest
 from db_action_response import DbActionResponse
+from expt_metrics import ExptMetricRequest
+from metric_types import MetricTypeRequest
 
 
 NAMED_TUPLES_LIST = 'tuples_list'
@@ -38,5 +40,15 @@ request_registry = {
         'Add or get or update experiment registration data',
         ExperimentRequest,
         DbActionResponse
-    )
+    ),
+    'expt_metrics': RequestHandler(
+        'Add or get or update experiment metrics data',
+        ExptMetricRequest,
+        DbActionResponse
+    ),
+    'metric_types': RequestHandler(
+        'Add or get or update metric types',
+        MetricTypeRequest,
+        DbActionResponse
+    ),  
 }

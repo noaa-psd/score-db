@@ -39,9 +39,12 @@ PW_AZV2 = 'pw_azv2'
 PW_AWV1 = 'pw_awv1'
 PW_AWV2 = 'pw_awv2'
 
+VALID_PLATFORMS = [HERA, ORION, PW_AZV1, PW_AZV2, PW_AWV1, PW_AWV2]
+
 INSERT = 'INSERT'
 UPDATE = 'UPDATE'
 
+EXACT_DATETIME = 'exact'
 FROM_DATETIME = 'from'
 TO_DATETIME = 'to'
 EXAMPLE_TIME = datetime(2022, 1, 14, 6, 23, 41)
@@ -51,15 +54,12 @@ DESCENDING = 'desc'
 
 VALID_ORDER_BY = [ASCENDING, DESCENDING]
 
-
-VALID_PLATFORMS = [HERA, ORION, PW_AZV1, PW_AZV2, PW_AWV1, PW_AWV2]
-
 HTTP_GET = 'GET'
 HTTP_PUT = 'PUT'
 
 VALID_METHODS = [HTTP_GET, HTTP_PUT]
 
-DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d_%H:%M:%S'
+DEFAULT_DATETIME_FORMAT_STR = '%Y-%m-%d %H:%M:%S'
 
 ExperimentData = namedtuple(
     'ExperimentData',
@@ -84,8 +84,6 @@ def validate_method(method):
         raise ValueError(msg)
     
     return method
-
-
 
 
 @dataclass
@@ -140,7 +138,7 @@ class Experiment:
 
 def get_experiment_from_body(body):
     if not isinstance(body, dict):
-        msg = 'The \'description\' key must be a type dict, actually ' \
+        msg = 'The \'body\' key must be a type dict, actually ' \
             f'{type(body)}'
         raise TypeError(msg)
     
@@ -255,8 +253,17 @@ def get_time_filter(filter, cls, key, constructed_filter):
         print(f'No \'{key}\' filter detected')
         return constructed_filter
 
+    exact_datetime = get_time(bounds.get(EXACT_DATETIME))
+    print(f'exact_datetime: {exact_datetime}')
+    if exact_datetime is not None:
+        constructed_filter[key] = (
+            getattr(cls, key) == exact_datetime
+        )
+        return constructed_filter
+
     from_datetime = get_time(bounds.get(FROM_DATETIME))
     to_datetime = get_time(bounds.get(TO_DATETIME))
+    
     
     print(f'Column \'{key}\' is of type {type(getattr(cls, key).type)}.')
 
@@ -474,9 +481,12 @@ class ExperimentRequest:
 
     def __post_init__(self):
         method = self.request_dict.get('method')
-        self.method = validate_method(self.request_dict.get('method'))
-        self.params = self.request_dict.get('params', {})
-        
+        self.method = validate_method(method)
+        self.params = self.request_dict.get('params')
+        self.filters = None
+        self.ordering = None
+        self.record_limit = None
+
         if isinstance(self.params, dict):
             self.filters = construct_filters(self.params.get('filters'))
             self.ordering = self.params.get('ordering')
@@ -619,8 +629,9 @@ class ExperimentRequest:
             exp
         )
 
-        for key, value in self.filters.items():
-            q = q.filter(value)
+        if self.filters is not None and len(self.filters) > 0:
+            for key, value in self.filters.items():
+                q = q.filter(value)
         
         # add column ordering
         column_ordering = build_column_ordering(exp, self.ordering)
@@ -668,5 +679,3 @@ class ExperimentRequest:
         print(f'response: {response}')
 
         return response
-
-            
