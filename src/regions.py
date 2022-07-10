@@ -1,3 +1,20 @@
+"""
+Copyright 2022 NOAA
+All rights reserved.
+
+Collection of methods and classes to facilitate insertion and selection
+of records into/from the 'regions' table.  The region table includes the
+following columns ['name', 'bounds', 'created_at', 'updated_at'] and each
+row's id serves as a foreign key to the 'expt_metrics' table.  A unique
+region consists of a combination of the name and the bounds values.
+Multiple regions with the same 'name' value are allowed as long as the
+'bounds' values are different.
+
+Each experiment metric is associated with a region (through the region's
+foreign key 'id') in order to limit duplicated data.
+
+
+"""
 from collections import namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -185,26 +202,7 @@ def get_filter_type(params):
             f'Must be one of [{VALID_FILTER_TYPES}]')
     return filter_type
 
-# def get_all_records(params):
-#     get_all = params.get('all', None)
-#     if get_all is None:
-#         return False
-#     if isinstance(get_all, bool):
-#         return get_all
-#     elif isinstance(get_all, int):
-#         return bool(get_all)
-#     elif not isinstance(get_all, str):
-#         raise ValueError('Invalid type %r for option %s; use '
-#                           '1/0, yes/no, true/false, on/off' % (
-#                               get_all, 'get_all'))
-#     elif get_all.lower() in ('1', 'yes', 'true', 't', 'y'):
-#         return True
-#     elif get_all.lower() in ('0', 'no', 'false', 'f', 'n'):
-#         return False
-#     else:
-#         raise ValueError('Invalid value %r for option %s; use '
-#                           '1/0, yes/no, true/false, y/n, t/f' % (
-#                               get_all, 'get_all')) 
+
 def get_regions_from_name_list(region_names):
     request_dict = {
         'name': 'region',
@@ -303,6 +301,7 @@ class RegionRequest:
                     )
                     records.append(item)
                     records_hash_vals.append(region.hash_val)
+
             success = True
             error_msg = None
             record_count = 0

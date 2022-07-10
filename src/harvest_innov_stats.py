@@ -2,7 +2,9 @@
 Copyright 2022 NOAA
 All rights reserved.
 
-Collection of methods to facilitate handling of score db requests
+Collection of methods to coordinate harvesting of innovation statistics
+created by the UFS-RNR workflow.  The harvested statistics will be inserted
+into the UFS-RNR centralized database for easy access at any later time.
 
 """
 from collections import namedtuple
