@@ -240,7 +240,6 @@ def get_time_filter(filter_dict, cls, key, constructed_filter):
             getattr(cls, key) <= to_datetime
         )
 
-    print(f'constructed_filter: {constructed_filter}')
     return constructed_filter
 
 
@@ -431,7 +430,6 @@ def build_column_ordering(cls, ordering):
         else:
             constructed_ordering.append(desc(col_obj))
     
-    print(f'constructed_ordering: {constructed_ordering}')
     return constructed_ordering
 
 
@@ -491,8 +489,6 @@ def get_expt_record(body):
         msg = f'Problems encountered requesting experiment data. err - {err}'
         raise ExptMetricsError(msg)
         
-    print(f'records: {records}, len(records): {records.shape[0]}')
-
     return records
 
 
@@ -568,10 +564,9 @@ class ExptMetricRequest:
 
         # filter experiment metrics table for all matching experiments
         constructed_filter = get_experiments_filter(
-            self.filters.get('experiments'), constructed_filter)
+            self.filters.get('experiment'), constructed_filter)
 
         # get only those records related to certain experiment
-
         constructed_filter = get_metric_types_filter(
             self.filters.get('metric_types'), constructed_filter)
         
@@ -581,8 +576,15 @@ class ExptMetricRequest:
         constructed_filter = get_time_filter(
             self.filters, ex_mt, 'time_valid', constructed_filter)
 
+        constructed_filter = get_string_filter(
+            self.filters,
+            ex_mt,
+            'elevation_unit',
+            constructed_filter,
+            'elevation_unit'
+        )
+
         if len(constructed_filter) > 0:
-            print(f'constructed_filters: {constructed_filter}')
             try:
                 for key, value in constructed_filter.items():
                     print(f'adding filter: {value}')
@@ -615,7 +617,6 @@ class ExptMetricRequest:
         unique_metric_types = set()
         for metric in metrics:
 
-            # print(f'metric: {metric}')
             if not isinstance(metric, ExptMetricInputData):
                 msg = 'Each metric must be a type ' \
                     f'\'{type(ExptMetricInputData)}\' was \'{metric}\''
@@ -636,9 +637,7 @@ class ExptMetricRequest:
             print(f'region counts do not match: {msg}')
             raise ExptMetricsError(msg)
 
-        print(f'regions: {rg_df}')
         rg_df_dict = dict(zip(rg_df.name, rg_df.id))
-        print(f'rg_df_dict: {rg_df_dict}')
 
         mt_df = metric_types.details.get('records')
         mt_df_nm_id = mt_df[['id', 'name']].copy()
@@ -691,7 +690,6 @@ class ExptMetricRequest:
 
         try:
             if len(records) > 0:
-                print(f'records: {records}')
                 for record in records:
                     msg = f'record.experiment_id: {record.experiment_id}, '
                     msg += f'record.metric_type_id: {record.metric_type_id}, '
@@ -759,9 +757,6 @@ class ExptMetricRequest:
                 created_at=metric.created_at
             )
             parsed_metrics.append(record)
-            # print(f'metric.metric_type: {metric.metric_type.name}')
-            # print(f'experiment: {metric.experiment.name}')
-            # print(f'metric: {metric.__dict__}')
         
         try:
             metrics_df = DataFrame(
@@ -775,10 +770,6 @@ class ExptMetricRequest:
             raise TypeError(msg) from err
         
         unique_metrics = self.remove_metric_duplicates(metrics_df)
-
-        # # limit number of returned records
-        # if self.record_limit is not None:
-        #     q = q.limit(self.record_limit)
 
         results = DataFrame()   
         error_msg = None
@@ -794,8 +785,6 @@ class ExptMetricRequest:
             print(f'error_msg: {error_msg}')
         else:
             message = 'Request for experiment metrics SUCCEEDED'
-            for idx, row in results.iterrows():
-                print(f'idx: {idx}, row: {row}')
             record_count = len(results.index)
         
         details = {}

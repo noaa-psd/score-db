@@ -9,6 +9,7 @@ import argparse
 
 from yaml_utils import YamlLoader
 import db_request_registry as dbrr
+import file_utils
 
 def handle_request(request_info):
     """
@@ -34,6 +35,8 @@ def handle_request(request_info):
     else:
         # Create dictionary from the input file
         db_request_dict = YamlLoader(request_info).load()[0]
+    
+    print(f'db_request_dict: {db_request_dict}')
 
     # Determine which request to use: note 'request_name' must exist
     # in the db_request yaml/dict and should point to one of the
@@ -41,8 +44,8 @@ def handle_request(request_info):
     # src/db_request_registry.py, see db_request_registry.py for example registered
     # requests).
     try:
-        request_name = db_request_dict.get('request_name')
-        print(f'request_name: {request_name}')
+        request_name = db_request_dict.get('db_request_name')
+        print(f'db_request_name: {request_name}')
         print(f'db_request_registry: {dbrr.request_registry}, ' \
                 f'type(request_registry): {type(dbrr.request_registry)}')
         db_request_handler = dbrr.request_registry.get(request_name)
@@ -50,9 +53,9 @@ def handle_request(request_info):
         msg = f'could not find request from request_dict: {db_request_dict}'
         raise KeyError(msg) from err
 
-    print(f'db_request_handler.name: {db_request_handler.name}')
+    print(f'db_request_handler.description: {db_request_handler.description}')
     db_request = db_request_handler.request(db_request_dict)
-    print(f'type(request_meta): {type(request_meta)}')
+    print(f'type(request_meta): {type(db_request)}')
     response = db_request.submit()
     # check type of response.  Must be a specific dataclass defined in registry
     return response

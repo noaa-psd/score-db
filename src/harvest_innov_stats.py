@@ -10,7 +10,7 @@ into the UFS-RNR centralized database for easy access at any later time.
 from collections import namedtuple
 import copy
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import pprint
 import traceback
@@ -101,7 +101,7 @@ class FileData:
 
 
 @dataclass
-class HarvestController(object):
+class HarvestInnovStatsRequest(object):
     config_dict: dict
     date_range: DateRange = field(init=False)
     hv_files: list = field(default_factory=list, init=False)
@@ -149,7 +149,7 @@ class HarvestController(object):
         self.expt_wallclk_strt = self.config_dict.get('expt_wallclk_strt')
 
 
-    def harvest_data(self):
+    def submit(self):
         
         master_list = []
         n_hours = 6
@@ -167,7 +167,9 @@ class HarvestController(object):
                 cycle_seconds = self.date_range.cycle_seconds
                 if not cycle_seconds in file_dict.cycles:
                     continue
-
+                
+                cycle_valid_time = self.date_range.current
+                cycle_valid_time += timedelta(hours=n_hours)
                 # get file meta
                 harvest_config = {
                     'harvester_name': file_dict.harvester,
@@ -191,10 +193,8 @@ class HarvestController(object):
 
                 expt_metrics = []
 
-
                 print(f'harvested_data: type: {type(harvested_data)}')
                 for row in harvested_data:
-                    print(f'name: {row.name}')
                     item = ExptMetricInputData(
                         row.name,
                         row.region_name,
@@ -205,7 +205,6 @@ class HarvestController(object):
                     )
 
                     expt_metrics.append(item)
-
 
                 request_dict = {
                     'name': 'expt_metrics',
@@ -218,13 +217,10 @@ class HarvestController(object):
                     }
                 }
 
-                print(f'request_dict: {request_dict}')
-
                 emr = ExptMetricRequest(request_dict)
                 # exit()
                 result = emr.submit()
 
-                
             self.date_range.increment(days=n_days, hours=n_hours)
 
             if self.date_range.at_end():

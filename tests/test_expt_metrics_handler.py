@@ -52,12 +52,12 @@ def test_put_exp_metrics_request_dict():
 def test_send_get_request():
 
     request_dict = {
-        'name': 'experiment',
+        'name': 'expt_metrics',
         'method': 'GET',
         'params': {
             'datestr_format': '%Y-%m-%d %H:%M:%S',
             'filters': {
-                'experiments': {
+                'experiment': {
                     'name': {
                         'exact': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_122015_HC44RS_lstr_tst',
                     },

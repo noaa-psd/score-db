@@ -351,6 +351,8 @@ class MetricTypeRequest:
             constraint='unique_metric_type',
             set_=dict(
                 # group_id=self.experiment_data.group_id,
+                measurement_units=self.metric_type_data.measurement_units,
+                stat_type=self.metric_type_data.stat_type,
                 description=self.metric_type_data.description,
                 updated_at=time_now
             )

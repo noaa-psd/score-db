@@ -54,16 +54,16 @@ def test_parse_request_dict():
         'name': 'experiment',
         'method': 'PUT',
         'body': {
-            'name': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_122015_HC44RS_lstr_tst',
+            'name': 'C96L64.UFSRNR.GSI_3DVAR.012016',
             'datestr_format': '%Y-%m-%d %H:%M:%S',
-            'cycle_start': '2015-12-01 00:00:00',
-            'cycle_stop': '2015-12-15 18:00:00',
+            'cycle_start': '2016-01-01 00:00:00',
+            'cycle_stop': '2016-01-31 18:00:00',
             'owner_id': 'Steve.Lawrence@noaa.gov',
             'group_id': 'gsienkf',
-            'experiment_type': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_122015',
+            'experiment_type': 'C96L64.UFSRNR.GSI_3DVAR.012016',
             'platform': 'pw_awv1',
-            'wallclock_start': '2022-08-03 02:40:34',
-            'wallclock_end': '2022-08-05 11:53:21',
+            'wallclock_start': '2021-07-22 09:22:05',
+            'wallclock_end': '2021-07-24 05:31:14',
             'description': json.dumps(description)
         }
     }
@@ -80,7 +80,7 @@ def test_send_get_request():
             'filters': {
                 'name': {
                     # 'like': '%_3DVAR_%',
-                    'exact': 'UFSRNR_GSI_SOCA_3DVAR_COUPLED_AWS_C5N18XL_122015'
+                    'exact': 'C96L64.UFSRNR.GSI_SOCA_3DVAR.012016'
                 },
                 'cycle_start': {
                     'from': '2015-01-01 00:00:00',
