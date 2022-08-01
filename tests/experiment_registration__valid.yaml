@@ -1,0 +1,15 @@
+---
+db_request_name: experiment
+method: PUT
+body:
+  name: EXAMPLE_EXPERIMENT_C96L64.UFSRNR.GSI_3DVAR.012016
+  datestr_format: "%Y-%m-%d %H:%M:%S"
+  cycle_start: '2016-01-01 00:00:00'
+  cycle_stop: '2016-01-31 18:00:00'
+  owner_id: first.last@noaa.gov
+  group_id: gsienkf
+  experiment_type: C96L64.UFSRNR.GSI_3DVAR.012016
+  platform: pw_awv1
+  wallclock_start: '2021-07-22 09:22:05'
+  wallclock_end: '2021-07-24 05:31:14'
+  description: '{"unstructured_json": "data"}'
